@@ -49,7 +49,7 @@ export const Experience = () => {
         `castShadow` means these objects will cast shadows on the floor.
       */}
       <group castShadow>
-        <CoffeeTable position={[-3, 0, 0]} />
+        <CoffeeTable position={[-1, 0, 0]} />
         <CoffeeTable position={[0, 0, 2]} />
         <CoffeeTable position={[3, 0, -1]} />
       </group>

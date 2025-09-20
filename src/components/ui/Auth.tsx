@@ -58,7 +58,7 @@ export default function AuthComponent() {
             {isSignIn ? 'Sign in to your account' : 'Create a new account'}
           </h2>
           <p className="mt-2 text-sm text-gray-400">
-            to enter the Kapihan
+            Got time? Spend it here
           </p>
         </div>
 
