@@ -6,6 +6,7 @@ import AuthComponent from '@/components/ui/Auth';
 import Chat from '@/components/ui/Chat';
 import { supabase } from '@/lib/supabaseClient';
 import { Session, RealtimeChannel } from '@supabase/supabase-js';
+import MainMenu from '@/components/ui/MainMenu';
 
 type PresencePayload = {
   online_at: string;
@@ -19,10 +20,26 @@ const Experience = dynamic(() => import('@/components/scene/Experience').then(mo
 });
 
 const MainScene = () => {
-
+  const [gameState, setGameState] = useState('menu');
+  const [hasCharacter, setHasCharacter] = useState(false);
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
+    const checkCharacter = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data, error } = await supabase
+          .from('characters')
+          .select('id')
+          .eq('user_id', session.user.id);
+        
+        if (data && data.length > 0) {
+          setHasCharacter(true);
+        }
+      }
+    };
+    checkCharacter();
+    
     const setupChannel = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -89,16 +106,33 @@ const MainScene = () => {
 
 
   return (
-    <div className="w-full h-screen relative bg-gray-800">
+  <div className="w-full h-screen relative bg-gray-800">
+    <div className={`absolute inset-0 ${gameState === 'menu' ? 'blur-sm' : ''}`}>
       <Experience />
-      <div className="absolute top-4 right-4 z-10">
-        <button
-          onClick={handleSignOut}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md font-semibold text-white transition-colors"
-        >
-          Sign Out
-        </button>
-      </div>
+    </div>
+
+      {/* Conditional UI based on game state */}
+      {gameState === 'menu' && (
+        <MainMenu
+          hasCharacter={hasCharacter}
+          onPlay={() => setGameState('in_game')}
+          onCreateCharacter={() => console.log("Go to character creation!")}
+          onSignOut={handleSignOut}
+        />
+      )}
+
+      {/* The button inside the 3D experience now opens the menu */}
+      {gameState === 'in_game' && (
+        <div className="absolute top-4 right-4 z-10">
+          <button
+            onClick={() => setGameState('menu')} // <-- THIS IS THE CHANGE
+            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-md font-semibold text-white transition-colors"
+          >
+            Menu
+          </button>
+        </div>
+      )}
+      
       <Chat />
     </div>
   );
@@ -138,7 +172,7 @@ export default function Home() {
   }
   
   return (
-    <main className="min-h-screen bg-gray-900">
+    <main className="min-h-screen bg-gray-900 flex items-center justify-center">
       {!session ? <AuthComponent /> : <MainScene />}
     </main>
   );
