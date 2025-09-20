@@ -7,6 +7,11 @@ import Chat from '@/components/ui/Chat';
 import { supabase } from '@/lib/supabaseClient';
 import { Session, RealtimeChannel } from '@supabase/supabase-js';
 
+type PresencePayload = {
+  online_at: string;
+  user_id: string; 
+};
+
 
 const Experience = dynamic(() => import('@/components/scene/Experience').then(mod => mod.Experience), {
   ssr: false,
@@ -28,7 +33,7 @@ const MainScene = () => {
         });
 
         channel.on('presence', { event: 'sync' }, () => {
-          const presenceState = channel.presenceState();
+          const presenceState = channel.presenceState<PresencePayload>();
           const userIds = Object.keys(presenceState).map(presenceId => presenceState[presenceId][0].user_id);
           
 
