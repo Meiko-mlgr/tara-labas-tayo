@@ -24,7 +24,7 @@ const formatDateSeparator = (dateString: string) => {
     return date.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
 };
 
-export default function Chat() {
+export default function Chat({ systemMessage }: { systemMessage: string | null }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,7 +42,7 @@ export default function Chat() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }
     }
-  }, [messages]);
+  }, [messages, systemMessage]);
 
 
   useEffect(() => {
@@ -125,7 +125,7 @@ export default function Chat() {
                 )}
                 
                 <div className={`flex mb-3 ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
-                  {/* This inner div holds the original message style. */}
+                  {/* This div holds the original message style. */}
                   <div>
                     <p className={`font-bold text-cyan-300 text-sm ${isMyMessage ? 'text-right' : 'text-left'}`}>
                       {!isMyMessage ? getSenderName(msg) : 'You'}
@@ -139,6 +139,11 @@ export default function Chat() {
               </React.Fragment>
             )
           })}
+          {systemMessage && (
+            <div className="text-center my-2">
+              <p className="text-xs text-gray-400 italic">{systemMessage}</p>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
         <form onSubmit={handleSendMessage} className="mt-4 flex">
