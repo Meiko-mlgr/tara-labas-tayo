@@ -29,6 +29,7 @@ const MainScene = () => {
   const channelRef = useRef<RealtimeChannel | null>(null);
   const [avatarColor, setAvatarColor] = useState<string>('#87CEEB');
   const [systemMessage, setSystemMessage] = useState<string | null>(null);
+  const [isFirstPlay, setIsFirstPlay] = useState(true);
 
  useEffect(() => {
     const fetchCharacters = async () => {
@@ -134,10 +135,15 @@ const MainScene = () => {
       setCharacters([...characters, data as Character]);
       setActiveCharacter(data as Character);
       setGameState('in_game');
+      setIsFirstPlay(true);
     }
   };
 
   const handleDeleteCharacter = async (characterId: string) => {
+    if (activeCharacter?.id === characterId) {
+        alert("You cannot delete a character that is currently in use.");
+        return;
+      }
     const { error } = await supabase
       .from('characters')
       .delete()
@@ -155,27 +161,44 @@ const MainScene = () => {
   const handlePlay = (character: Character) => {
     setActiveCharacter(character);
     setGameState('in_game');
+    setIsFirstPlay(true); 
   };
+  
+  const handleContinue = () => {
+    setGameState('in_game');
+  }
 
   const handleCreateCharacter = (slot: number) => {
     setSelectedSlot(slot);
     setGameState('character_creation');
   };
+  
+  const handleBackToMainMenu = () => {
+    setActiveCharacter(null);
+  };
 
 
   return (
   <div className="w-full h-screen relative bg-gray-800">
-      <div className={`absolute inset-0 ${gameState === 'menu' ? 'blur-sm' : ''}`}>
-        <Experience gameState={gameState} avatarColor={avatarColor} />
+      <div className={`absolute inset-0 ${gameState === 'in_game' }`}>
+        <Experience 
+            gameState={gameState} 
+            avatarColor={avatarColor} 
+            activeCharacter={activeCharacter}
+            isFirstPlay={isFirstPlay}
+        />
       </div>
 
       {gameState === 'menu' && (
         <MainMenu
           characters={characters}
           onPlay={handlePlay}
+          onContinue={handleContinue}
           onCreateCharacter={handleCreateCharacter}
           onSignOut={handleSignOut}
           onDelete={handleDeleteCharacter}
+          activeCharacter={activeCharacter}
+          onBackToMainMenu={handleBackToMainMenu}
         />
       )}
 
