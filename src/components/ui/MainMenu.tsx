@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import CustomAlert from './CustomAlert'; // Import the new component
+import CustomAlert from './CustomAlert';
 
 export type Character = {
   id: string;
