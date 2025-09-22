@@ -4,12 +4,10 @@ import React, { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 // A simple Coffee Icon component
-const CoffeeIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M10 20.5c.9-.1 1.8-.3 2.5-.6 2.3-1.1 3.4-3.9 2.8-6.2-1.3-4.8-5.3-8.2-10-8.2-.1 0-.3 0-.4.1" />
-    <path d="M4.2 10.3c-.7.5-1.2 1.2-1.4 2.1-.3 1.4.3 2.9 1.3 3.8 1.4 1.3 3.3 1.9 5.2 1.9h.1" />
-    <path d="M18 14c.4.2.8.3 1.2.5 1.2.4 2.6.2 3.6-.6.8-.7 1.2-1.7 1.2-2.8-.1-2.4-2.5-4.2-4.9-3.9" />
-    <path d="M8 3.5c1.4-1 3.3-1.4 5.2-1.2 3.4.4 6 3 6.6 6.4.1.6.1 1.2.1 1.8" />
+const NewLogoIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg {...props} width="512px" height="512px" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+    <path fill="var(--ci-primary-color, currentColor)" d="M353.415,200l-30.981-57.855-60.717-20.239-.14.432L167.21,149.3A32.133,32.133,0,0,0,144,180.068V264h32V180.069l73.6-21.028-32.512,99.633-.155-.056-29.464,82.5a16.088,16.088,0,0,1-20.127,9.8L101.06,328.821,90.94,359.179l66.282,22.093A48,48,0,0,0,217.6,351.881l24.232-67.849,17.173,5.6,48.3,48.3A15.9,15.9,0,0,1,312,349.255V456h32V349.255a47.694,47.694,0,0,0-14.059-33.942l-48.265-48.264,26.783-82.077,19.269,34.683A24.011,24.011,0,0,0,348.707,232H432V200Z" />
+    <path fill="var(--ci-primary-color, currentColor)" d="M286.828,109.707a36,36,0,1,0-12.916-27.619A35.851,35.851,0,0,0,286.828,109.707Z" />
   </svg>
 );
 
@@ -17,6 +15,8 @@ export default function AuthComponent() {
   const [isSignIn, setIsSignIn] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -27,6 +27,12 @@ export default function AuthComponent() {
     setError(null);
     setMessage(null);
 
+    if (!isSignIn && password !== confirmPassword) {
+      setError("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
+
     try {
       if (isSignIn) {
         const { error } = await supabase.auth.signInWithPassword({
@@ -35,15 +41,25 @@ export default function AuthComponent() {
         });
         if (error) throw error;
       } else {
+
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              username: username,
+            }
+          }
         });
         if (error) throw error;
         setMessage("Check your email for the confirmation link!");
       }
     } catch (error: any) {
-      setError(error.message || 'An unexpected error occurred.');
+      if (error.message && error.message.includes('duplicate key value violates unique constraint')) {
+        setError('This username is already taken. Please choose another one.');
+      } else {
+        setError(error.message || 'An unexpected error occurred.');
+      }
     } finally {
       setLoading(false);
     }
@@ -53,17 +69,35 @@ export default function AuthComponent() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-900 px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <CoffeeIcon className="mx-auto h-12 w-auto text-cyan-400" />
+          <NewLogoIcon className="mx-auto h-35 w-auto text-cyan-400" />
           <h2 className="mt-6 text-3xl font-bold tracking-tight text-white">
             {isSignIn ? 'Sign in to your account' : 'Create a new account'}
           </h2>
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-sm text-gray-500">
             Got time? Spend it here
           </p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleAuthAction}>
           <div className="space-y-4 rounded-md shadow-sm">
+            {!isSignIn && (
+              <>
+                <div>
+                  <label htmlFor="username" className="sr-only">Username</label>
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    required
+                    minLength={3}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="relative block w-full appearance-none rounded-md border border-gray-700 bg-gray-800 px-3 py-3 text-white placeholder-gray-400 focus:z-10 focus:border-cyan-500 focus:outline-none focus:ring-cyan-500 sm:text-sm"
+                    placeholder="Username"
+                  />
+                </div>
+              </>
+            )}
             <div>
               <label htmlFor="email-address" className="sr-only">Email address</label>
               <input
@@ -84,7 +118,7 @@ export default function AuthComponent() {
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete={isSignIn ? "current-password" : "new-password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -92,6 +126,22 @@ export default function AuthComponent() {
                 placeholder="Password"
               />
             </div>
+            {!isSignIn && (
+                <div>
+                  <label htmlFor="confirm-password" className="sr-only">Confirm Password</label>
+                  <input
+                    id="confirm-password"
+                    name="confirm-password"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="relative block w-full appearance-none rounded-md border border-gray-700 bg-gray-800 px-3 py-3 text-white placeholder-gray-400 focus:z-10 focus:border-cyan-500 focus:outline-none focus:ring-cyan-500 sm:text-sm"
+                    placeholder="Confirm Password"
+                  />
+                </div>
+            )}
           </div>
           
           {error && <p className="text-sm text-red-400 text-center">{error}</p>}
@@ -111,7 +161,7 @@ export default function AuthComponent() {
         <p className="text-center text-sm text-gray-400">
           {isSignIn ? "Don't have an account?" : "Already have an account?"}
           <button
-            onClick={() => setIsSignIn(!isSignIn)}
+            onClick={() => { setIsSignIn(!isSignIn); setError(null); setMessage(null); }}
             className="ml-2 font-medium text-cyan-400 hover:text-cyan-300"
           >
             {isSignIn ? 'Sign Up' : 'Sign In'}
