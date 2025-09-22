@@ -166,7 +166,7 @@ const MainScene = () => {
   return (
   <div className="w-full h-screen relative bg-gray-800">
       <div className={`absolute inset-0 ${gameState === 'menu' ? 'blur-sm' : ''}`}>
-        <Experience gameState={gameState} avatarColor={avatarColor} />
+        <Experience gameState={gameState} avatarColor={avatarColor} activeCharacter={activeCharacter}/>
       </div>
 
       {gameState === 'menu' && (
