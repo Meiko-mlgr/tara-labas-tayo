@@ -8,6 +8,13 @@ import * as THREE from 'three';
 import { Player } from "./Player";
 import { type Character } from "../ui/MainMenu";
 
+const spawnPoints = [
+    new THREE.Vector3(-5, 1.25, 0),
+    new THREE.Vector3(5, 1.25, 5),
+    new THREE.Vector3(0, 1.25, -5),
+    new THREE.Vector3(-5, 1.25, 5),
+];
+
 // Scene Objects (Chair, Table, Window, Avatar) 
 const Chair = ({ position, rotation = [0, 0, 0] }: { position: [number, number, number], rotation?: [number, number, number] }) => (
     <group position={position} rotation={rotation}>
@@ -55,29 +62,77 @@ const MenuCamera = () => (
 const CharacterCreatorCamera = ({ target }: { target: THREE.Vector3 }) => (
     <>
       <PerspectiveCamera makeDefault position={[target.x + 4.5, target.y + 3.1, target.z + 5]} fov={50} />
-      <OrbitControls target={target} minDistance={3} maxDistance={8} />
+      <OrbitControls 
+        target={target} 
+        minDistance={3} 
+        maxDistance={8} 
+        minAzimuthAngle={Math.PI / 4}
+        maxAzimuthAngle={Math.PI / 1.2}  
+        minPolarAngle={Math.PI / 3}   
+        maxPolarAngle={Math.PI / 2}
+        enablePan={false}
+        enableZoom={false}
+      />
     </>
 );
 
-const InGameCamera= () => (
-    <>
-      <OrthographicCamera makeDefault position={[15, 15, 15]} zoom={50} />
-      <OrbitControls target={[0, 1, 0]} minZoom={30} maxZoom={80} />
-    </>
-);
+const InGameCamera = ({ playerRef }: { playerRef: React.RefObject<RapierRigidBody | null> }) => {
+    const { camera } = useThree();
+    const cameraTarget = useMemo(() => new THREE.Vector3(), []);
+    const cameraPosition = useMemo(() => new THREE.Vector3(), []);
 
-export const Experience = ({ gameState, avatarColor, activeCharacter }: { gameState: string, avatarColor: string, activeCharacter: Character | null }) => {
+    useFrame((_, delta) => {
+        const playerPosition = playerRef.current?.translation();
+        if (!playerPosition) return;
+
+        cameraPosition.set(
+            playerPosition.x + 10,
+            playerPosition.y + 10,
+            playerPosition.z + 10
+        );
+        cameraTarget.lerp(playerPosition as THREE.Vector3, 2 * delta);
+        
+        camera.position.lerp(cameraPosition, 2 * delta);
+        if (camera instanceof THREE.OrthographicCamera) {
+            camera.zoom = THREE.MathUtils.lerp(camera.zoom, 80, 2 * delta);
+            camera.lookAt(cameraTarget);
+            camera.updateProjectionMatrix();
+        }
+    });
+
+    return null;
+};
+
+
+const SceneContent = ({ gameState, avatarColor, activeCharacter, isFirstPlay }: { gameState: string, avatarColor: string, activeCharacter: Character | null, isFirstPlay: boolean }) => {
     const avatarPosition = useMemo(() => new THREE.Vector3(-8, 1.25, 1), []);
     const [movementTarget, setMovementTarget] = useState<THREE.Vector3 | null>(null);
     const playerRigidBodyRef = useRef<RapierRigidBody>(null);
+    const [lastPlayerPosition, setLastPlayerPosition] = useState<THREE.Vector3>(new THREE.Vector3(-5, 1.25, 0));
+
+    const initialPlayerPosition = useMemo(() => {
+        if (isFirstPlay) {
+          const randomSpawnPoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
+          setLastPlayerPosition(randomSpawnPoint);
+          return randomSpawnPoint;
+        }
+        return lastPlayerPosition;
+      }, [isFirstPlay]);
+    
+      useFrame(() => {
+        if (activeCharacter && playerRigidBodyRef.current) {
+          const currentPosition = playerRigidBodyRef.current.translation();
+          setLastPlayerPosition(new THREE.Vector3(currentPosition.x, currentPosition.y, currentPosition.z));
+        }
+      });
 
     return (
-        <Canvas shadows>
-            {gameState === 'menu' && <MenuCamera />}
+        <>
+            {gameState === 'menu' && !activeCharacter && <MenuCamera />}
             {gameState === 'character_creation' && <CharacterCreatorCamera target={avatarPosition} />}
-            {gameState === 'in_game' && (
+            {(gameState === 'in_game' || (gameState === 'menu' && activeCharacter)) && (
                 <>
-                    <OrthographicCamera makeDefault position={[15, 15, 15]} zoom={80} />
+                    <OrthographicCamera makeDefault position={[15, 15, 15]} zoom={50} />
                     <InGameCamera playerRef={playerRigidBodyRef} />
                 </>
             )}
@@ -88,13 +143,14 @@ export const Experience = ({ gameState, avatarColor, activeCharacter }: { gameSt
             
             <Suspense fallback={null}>
                 <Physics>
-                    {gameState === 'in_game' && activeCharacter && (
-                        <Player 
-                            ref={playerRigidBodyRef}
-                            character={activeCharacter} 
-                            targetPosition={movementTarget}
-                        />
-                    )}
+                {activeCharacter && (
+                    <Player 
+                        ref={playerRigidBodyRef}
+                        character={activeCharacter} 
+                        targetPosition={gameState === 'in_game' ? movementTarget : null}
+                        initialPosition={initialPlayerPosition}
+                    />
+                )}
                     <RigidBody type="fixed" name="floor">
                         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow onClick={(e) => setMovementTarget(e.point)}>
                             <planeGeometry args={[20, 20]} />
@@ -134,6 +190,20 @@ export const Experience = ({ gameState, avatarColor, activeCharacter }: { gameSt
             </Suspense>
             
             {gameState === 'character_creation' && <Avatar avatarColor={avatarColor} position={avatarPosition} />}
+        </>
+    );
+};
+
+
+export const Experience = ({ gameState, avatarColor, activeCharacter, isFirstPlay }: { gameState: string, avatarColor: string, activeCharacter: Character | null, isFirstPlay: boolean }) => {
+    return (
+        <Canvas shadows>
+            <SceneContent 
+                gameState={gameState} 
+                avatarColor={avatarColor} 
+                activeCharacter={activeCharacter} 
+                isFirstPlay={isFirstPlay} 
+            />
         </Canvas>
     );
 };
