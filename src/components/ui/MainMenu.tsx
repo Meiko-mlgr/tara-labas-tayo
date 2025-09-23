@@ -3,8 +3,10 @@ import CustomAlert from './CustomAlert';
 
 export type Character = {
   id: string;
+  user_id: string;
   avatar_color: string;
   slot_number: number;
+  username?: string;
 };
 
 type MainMenuProps = {
@@ -28,7 +30,7 @@ const PlusIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export default function MainMenu({ onPlay, onContinue, onCreateCharacter, onSignOut, onDelete, characters, activeCharacter, onBackToMainMenu }: MainMenuProps) {
   const [view, setView] = useState<'start' | 'slots'>('start');
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
-  const [alertMessage, setAlertMessage] = useState<string | null>(null); // State for the custom alert
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
   if (view === 'start') {
     return (
