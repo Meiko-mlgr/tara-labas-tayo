@@ -30,69 +30,93 @@ const MainScene = () => {
   const [avatarColor, setAvatarColor] = useState<string>('#87CEEB');
   const [systemMessage, setSystemMessage] = useState<string | null>(null);
   const [isFirstPlay, setIsFirstPlay] = useState(true);
+  const [username, setUsername] = useState<string | null>(null);
 
  useEffect(() => {
-    const fetchCharacters = async () => {
+    const fetchUserData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        const { data, error } = await supabase.from('characters').select('*').eq('user_id', session.user.id);
-        if (error) console.error("Error fetching characters:", error);
-        else if (data) setCharacters(data as Character[]);
+        // Fetch characters
+        const { data: chars, error: charsError } = await supabase.from('characters').select('*').eq('user_id', session.user.id);
+        if (charsError) console.error("Error fetching characters:", charsError);
+        else if (chars) setCharacters(chars as Character[]);
+
+        // Fetch username from profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (profileError) console.error("Error fetching profile:", profileError);
+        else if (profile) setUsername(profile.username);
       }
     };
-    fetchCharacters();
+    fetchUserData();
+  }, []);
     
+  useEffect(() => {
     const setupChannel = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
       
-      if (session) {
-
-        const channel = supabase.channel('room-presence', {
-          config: { presence: { key: session.user.id } }
-        });
-
-        channel.on('presence', { event: 'sync' }, () => {
-          const presenceState = channel.presenceState<PresencePayload>();
-          const userIds = Object.keys(presenceState).map(presenceId => presenceState[presenceId][0].user_id);
-          
-
-        });
-
-        channel.on('presence', { event: 'join' }, ({ newPresences }) => {
-            const userId = newPresences[0].user_id.substring(0, 8);
-            setSystemMessage(`User ${userId}... joined the room.`);
-            // Clear the message after 5 seconds
-            setTimeout(() => setSystemMessage(null), 5000);
-          });
-  
-          channel.on('presence', { event: 'leave' }, ({ leftPresences }) => {
-            const userId = leftPresences[0].user_id.substring(0, 8);
-            setSystemMessage(`User ${userId}... left the room.`);
-            // Clear the message after 5 seconds
-            setTimeout(() => setSystemMessage(null), 5000);
-          });
-
-        channel.subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            await channel.track({ 
-              online_at: new Date().toISOString(),
-              user_id: session.user.id 
+        if (session && username) {
+            const channel = supabase.channel('room-presence', {
+                config: { presence: { key: session.user.id } }
             });
-          }
-        });
 
-        channelRef.current = channel;
-      }
+            channel.on('presence', { event: 'sync' }, () => {
+                const presenceState = channel.presenceState<PresencePayload>();
+                const userIds = Object.keys(presenceState).map(presenceId => presenceState[presenceId][0].user_id);
+            });
+
+            channel.on('presence', { event: 'join' }, async ({ newPresences }) => {
+                const joinedUserId = newPresences[0].user_id;
+
+                const { data: profile } = await supabase
+                .from('profiles')
+                .select('username')
+                .eq('id', joinedUserId)
+                .single();
+
+                const displayName = profile?.username || `User ${joinedUserId.substring(0, 8)}...`;
+                setSystemMessage(`${displayName} joined the room.`);
+                setTimeout(() => setSystemMessage(null), 5000);
+            });
+    
+            channel.on('presence', { event: 'leave' }, async ({ leftPresences }) => {
+                const leftUserId = leftPresences[0].user_id;
+                const { data: profile } = await supabase
+                .from('profiles')
+                .select('username')
+                .eq('id', leftUserId)
+                .single();
+
+                const displayName = profile?.username || `User ${leftUserId.substring(0, 8)}...`;
+                setSystemMessage(`${displayName} left the room.`);
+                setTimeout(() => setSystemMessage(null), 5000);
+            });
+
+            channel.subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    await channel.track({ 
+                    online_at: new Date().toISOString(),
+                    user_id: session.user.id 
+                    });
+                }
+            });
+
+            channelRef.current = channel;
+        }
     };
 
     setupChannel();
 
     return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-      }
+        if (channelRef.current) {
+            supabase.removeChannel(channelRef.current);
+        }
     };
-  }, []);
+}, [username]);
 
 
   const handleSignOut = async () => {
@@ -104,7 +128,7 @@ const MainScene = () => {
         const userCount = Object.keys(presenceState).length;
 
         console.log(`Users in room before I leave: ${userCount}`);
-        // checks the person in the room
+
         if (userCount <= 1) {
           console.log(`No users left, cleaning chatbox`);
           await supabase.from('messages').delete().gt('id', 0);
@@ -152,16 +176,17 @@ const MainScene = () => {
     if (error) {
       console.error('Error deleting character:', error);
     } else {
-      // remove the character from the local state
+
       setCharacters(characters.filter(c => c?.id !== characterId));
       console.log('Character deleted successfully');
     }
   };
 
   const handlePlay = (character: Character) => {
-    setActiveCharacter(character);
+    const characterWithUsername = { ...character, username: username || 'Player' };
+    setActiveCharacter(characterWithUsername);
     setGameState('in_game');
-    setIsFirstPlay(true); 
+    setIsFirstPlay(true);
   };
   
   const handleContinue = () => {

@@ -2,14 +2,17 @@
 
 import { useFrame } from "@react-three/fiber";
 import { RapierRigidBody, RigidBody, CapsuleCollider } from "@react-three/rapier";
-import { useRef, forwardRef, useEffect } from "react";
+import { forwardRef, useEffect } from "react";
 import * as THREE from "three";
 import { type Character } from "../ui/MainMenu";
+import { Html } from "@react-three/drei";
 
 type PlayerProps = {
   character: Character;
   targetPosition: THREE.Vector3 | null;
   initialPosition: THREE.Vector3;
+  groupRef: React.RefObject<THREE.Group | null>;
+  gameState: string;
 };
 
 const MOVE_SPEED = 5;
@@ -17,8 +20,7 @@ const _playerDirection = new THREE.Vector3();
 const _playerTranslation = new THREE.Vector3();
 
 
-export const Player = forwardRef<RapierRigidBody, PlayerProps>(({ character, targetPosition, initialPosition }, ref) => {
-  const playerRef = useRef<THREE.Group>(null);
+export const Player = forwardRef<RapierRigidBody, PlayerProps>(({ character, targetPosition, initialPosition, groupRef, gameState }, ref) => {
 
   useEffect(() => {
     const rigidBody = (ref as React.RefObject<RapierRigidBody>)?.current;
@@ -29,7 +31,7 @@ export const Player = forwardRef<RapierRigidBody, PlayerProps>(({ character, tar
 
   useFrame(() => {
     const rigidBody = (ref as React.RefObject<RapierRigidBody>)?.current;
-    if (!rigidBody || !playerRef.current) return;
+    if (!rigidBody || !groupRef.current) return;
 
     if (!targetPosition) {
         rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
@@ -48,12 +50,17 @@ export const Player = forwardRef<RapierRigidBody, PlayerProps>(({ character, tar
     rigidBody.setLinvel({ x: _playerDirection.x, y: 0, z: _playerDirection.z }, true);
 
     const angle = Math.atan2(_playerDirection.x, _playerDirection.z);
-    playerRef.current.rotation.y = angle;
+    groupRef.current.rotation.y = angle;
   });
 
   return (
     <RigidBody ref={ref} colliders={false} lockRotations>
-      <group ref={playerRef}>
+      <group ref={groupRef}>
+        {gameState === 'in_game' && (
+            <Html position={[0, 2.0, 0]} wrapperClass="username" center>
+                <div>{character.username || 'Player'}</div>
+            </Html>
+        )}
         <mesh castShadow>
           <capsuleGeometry args={[0.5, 1.5, 4, 8]} />
           <meshStandardMaterial color={character.avatar_color} />
@@ -71,5 +78,3 @@ export const Player = forwardRef<RapierRigidBody, PlayerProps>(({ character, tar
     </RigidBody>
   );
 });
-
-Player.displayName = "Player";

@@ -7,6 +7,7 @@ import { useMemo, useState, useRef, Suspense } from "react";
 import * as THREE from 'three';
 import { Player } from "./Player";
 import { type Character } from "../ui/MainMenu";
+import { MultiplayerManager } from "./MultiplayerManager";
 
 const spawnPoints = [
     new THREE.Vector3(-5, 1.25, 0),
@@ -103,11 +104,11 @@ const InGameCamera = ({ playerRef }: { playerRef: React.RefObject<RapierRigidBod
     return null;
 };
 
-
 const SceneContent = ({ gameState, avatarColor, activeCharacter, isFirstPlay }: { gameState: string, avatarColor: string, activeCharacter: Character | null, isFirstPlay: boolean }) => {
     const avatarPosition = useMemo(() => new THREE.Vector3(-8, 1.25, 1), []);
     const [movementTarget, setMovementTarget] = useState<THREE.Vector3 | null>(null);
     const playerRigidBodyRef = useRef<RapierRigidBody>(null);
+    const playerGroupRef = useRef<THREE.Group>(null);
     const [lastPlayerPosition, setLastPlayerPosition] = useState<THREE.Vector3>(new THREE.Vector3(-5, 1.25, 0));
 
     const initialPlayerPosition = useMemo(() => {
@@ -144,12 +145,22 @@ const SceneContent = ({ gameState, avatarColor, activeCharacter, isFirstPlay }: 
             <Suspense fallback={null}>
                 <Physics>
                 {activeCharacter && (
+                    <>
                     <Player 
                         ref={playerRigidBodyRef}
                         character={activeCharacter} 
                         targetPosition={gameState === 'in_game' ? movementTarget : null}
                         initialPosition={initialPlayerPosition}
+                        groupRef={playerGroupRef}
+                        gameState={gameState}
                     />
+                    <MultiplayerManager
+                            character={activeCharacter}
+                            playerRigidBodyRef={playerRigidBodyRef}
+                            playerGroupRef={playerGroupRef}
+                            gameState={gameState}
+                      />
+                    </>
                 )}
                     <RigidBody type="fixed" name="floor">
                         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow onClick={(e) => setMovementTarget(e.point)}>
@@ -169,7 +180,7 @@ const SceneContent = ({ gameState, avatarColor, activeCharacter, isFirstPlay }: 
                     <Window position={[-5, 4.92, -10]} />
                     <Window position={[5, 4.92, -10]} />          
                     <mesh position={[-10, 5, 0]} rotation={[0, Math.PI / 2, 0]} receiveShadow><boxGeometry args={[20, 10.1, 0.1]} /><meshStandardMaterial color="#D3C5B7" /></mesh>
-                    
+                    {/* Chair and Table position */}
                     <RigidBody type="fixed" colliders="cuboid"><Table position={[0, 0, 0]} /></RigidBody>
                     <RigidBody type="fixed" colliders="cuboid"><Chair position={[1.2, 0, 0]} rotation={[0, -Math.PI / 2, 0]} /></RigidBody>
                     <RigidBody type="fixed" colliders="cuboid"><Chair position={[-1, 0, -1]} rotation={[0, Math.PI / 4, 0]} /></RigidBody>
@@ -193,7 +204,6 @@ const SceneContent = ({ gameState, avatarColor, activeCharacter, isFirstPlay }: 
         </>
     );
 };
-
 
 export const Experience = ({ gameState, avatarColor, activeCharacter, isFirstPlay }: { gameState: string, avatarColor: string, activeCharacter: Character | null, isFirstPlay: boolean }) => {
     return (
