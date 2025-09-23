@@ -67,13 +67,16 @@ export default function Chat({ systemMessage }: { systemMessage: string | null }
       }
     });
   
- 
+  // message polling
+    const intervalId = setInterval(fetchMessages, 2000);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
     // Cleanup function
     return () => {
+      clearInterval(intervalId);
       subscription?.unsubscribe();
     };
   }, []); 
