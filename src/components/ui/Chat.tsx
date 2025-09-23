@@ -52,9 +52,7 @@ export default function Chat({ systemMessage }: { systemMessage: string | null }
         .select('*, profiles(username)')
         .order('inserted_at', { ascending: true });
 
-      if (error) {
-        console.error("Error fetching messages:", error);
-      } else if (data) {
+      if (data) {
         setMessages(data as Message[]);
       }
     };

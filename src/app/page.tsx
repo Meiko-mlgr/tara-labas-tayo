@@ -11,7 +11,7 @@ import CharacterCreator from '@/components/ui/CharacterCreator';
 
 type PresencePayload = {
   online_at: string;
-  user_id: string; 
+  user_id: string;
 };
 
 
@@ -23,7 +23,7 @@ const Experience = dynamic(() => import('@/components/scene/Experience').then(mo
 
 const MainScene = () => {
   const [gameState, setGameState] = useState('menu');
-  const [characters, setCharacters] = useState<(Character | null)[]>([]); 
+  const [characters, setCharacters] = useState<(Character | null)[]>([]);
   const [activeCharacter, setActiveCharacter] = useState<Character | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -38,8 +38,7 @@ const MainScene = () => {
       if (session) {
         // Fetch characters
         const { data: chars, error: charsError } = await supabase.from('characters').select('*').eq('user_id', session.user.id);
-        if (charsError) console.error("Error fetching characters:", charsError);
-        else if (chars) setCharacters(chars as Character[]);
+        if (chars) setCharacters(chars as Character[]);
 
         // Fetch username from profiles table
         const { data: profile, error: profileError } = await supabase
@@ -48,8 +47,7 @@ const MainScene = () => {
           .eq('id', session.user.id)
           .single();
         
-        if (profileError) console.error("Error fetching profile:", profileError);
-        else if (profile) setUsername(profile.username);
+        if (profile) setUsername(profile.username);
       }
     };
     fetchUserData();
@@ -127,17 +125,13 @@ const MainScene = () => {
         const presenceState = channel.presenceState();
         const userCount = Object.keys(presenceState).length;
 
-        console.log(`Users in room before I leave: ${userCount}`);
-
         if (userCount <= 1) {
-          console.log(`No users left, cleaning chatbox`);
           await supabase.from('messages').delete().gt('id', 0);
         }
         
         await channel.untrack();
 
       } catch (error) {
-        console.error("Error during sign out cleanup:", error);
       }
     }
     
@@ -153,9 +147,7 @@ const MainScene = () => {
       .insert({ user_id: user.id, avatar_color: avatarColor, slot_number: selectedSlot })
       .select().single();
 
-    if (error) {
-      console.error("Error saving character:", error);
-    } else if (data) {
+    if (data) {
       setCharacters([...characters, data as Character]);
       setActiveCharacter(data as Character);
       setGameState('in_game');
@@ -165,7 +157,6 @@ const MainScene = () => {
 
   const handleDeleteCharacter = async (characterId: string) => {
     if (activeCharacter?.id === characterId) {
-        alert("You cannot delete a character that is currently in use.");
         return;
       }
     const { error } = await supabase
@@ -173,12 +164,8 @@ const MainScene = () => {
       .delete()
       .eq('id', characterId);
 
-    if (error) {
-      console.error('Error deleting character:', error);
-    } else {
-
+    if (!error) {
       setCharacters(characters.filter(c => c?.id !== characterId));
-      console.log('Character deleted successfully');
     }
   };
 
@@ -253,6 +240,11 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+    document.addEventListener('contextmenu', handleContextMenu);
+
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
@@ -269,6 +261,7 @@ export default function Home() {
 
     return () => {
       subscription?.unsubscribe();
+      document.removeEventListener('contextmenu', handleContextMenu);
     };
   }, []);
 
