@@ -58,7 +58,6 @@ export const MultiplayerManager = ({ character, playerRigidBodyRef, playerGroupR
                 leftCharacterIds.forEach(id => {
                     delete newPlayers[id];
                 });
-                console.log('Players left:', leftCharacterIds);
                 return newPlayers;
             });
         });
@@ -82,7 +81,7 @@ export const MultiplayerManager = ({ character, playerRigidBodyRef, playerGroupR
                 }
             }
             setPlayers(newPlayers);
-            console.log('Players synced:', Object.keys(newPlayers));
+
         });
 
 
@@ -106,7 +105,6 @@ export const MultiplayerManager = ({ character, playerRigidBodyRef, playerGroupR
                     characterId: character.id,
                     username: character.username,
                 });
-                console.log('Subscribed to game-room and tracking presence.');
             }
         });
 
