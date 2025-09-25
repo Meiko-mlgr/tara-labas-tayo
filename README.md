@@ -1,5 +1,7 @@
 # Tara, Labas Tayo? (Come on, let's go out?)
 
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://tara-labas.netlify.app)
+
 _"Tara, Labas Tayo?"_ is a Filipino phrase that translates to "Come on, let's go out?". This project is a web-based, 3D social space where users can create characters, hang out, and chat in real-time. It's a digital hangout spot that captures the spirit of community and friendship.
 
 ## About The Project
