@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tara, Labas Tayo? (Come on, let's go out?)
+
+_"Tara, Labas Tayo?"_ is a Filipino phrase that translates to "Come on, let's go out?". This project is a web-based, 3D social space where users can create characters, hang out, and chat in real-time. It's a digital hangout spot that captures the spirit of community and friendship.
+
+## About The Project
+
+This project is a comprehensive showcase of my full-stack development capabilities. It's an interactive 3D application featuring real-time player synchronization, a persistent backend for user data, and live chat functionality. The primary goal is to demonstrate the ability to build a complete, modern web application using an industry-standard tech stack.
+
+## Tech Stack
+
+* **Framework:** [Next.js](https://nextjs.org/) (with TypeScript)
+* **3D Graphics:** [Three.js](https://threejs.org/) (with [React Three Fiber](https://docs.pmnd.rs/react-three-fiber/getting-started/introduction) and [Drei](https://github.com/pmndrs/drei))
+* **Physics:** [Rapier](https://rapier.rs/) (via [@react-three/rapier](https://github.com/pmndrs/react-three-rapier))
+* **Backend & Database:** [Supabase](https://supabase.io/)
+* **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+* **Version Control:** [Git](https://git-scm.com/) & [Github](https://github.com)
+
+## Features
+
+* **Real-time Multiplayer:** Synchronized player movements and interactions in a shared 3D space.
+* **User Authentication:** Secured user sign-up and login functionality integrated and handled by Supabase.
+* **Character Customization:** Users can create and customize their avatars with different colors.
+* **Live Chat:** A real-time chat feature allows users to communicate with each other in the room.
+* **Persistent Data:** User and character data are stored in a Supabase backend, allowing users to continue where they left off, and clear when no users are in the room.
 
 ## Getting Started
 
-First, run the development server:
+To get a local copy up and running follow these simple steps.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**Prerequisites**
+* Node.js (v18 or higher recommended)
+* npm, yarn, or pnpm
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1.  **Clone the repository**
+    ```bash
+    git clone [https://github.com/Meiko-mlgr/tara-labas-tayo.git](https://github.com/Meiko-mlgr/tara-labas-tayo.git)
+    ```
+2.  **Navigate to the project directory**
+    ```bash
+    cd tara-labas-tayo
+    ```
+3.  **Install NPM packages**
+    ```bash
+    npm install
+    ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Set up Supabase**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Go to [Supabase](https://supabase.io) and create a new project.
+- In the Supabase dashboard, go to the SQL Editor.
+- Create a new query and run the contents of the ```schema.sql``` file from this repository. This will create all the necessary tables and security policies.
 
-## Learn More
+**Set up Environment Variables**
+- In the root of your project, create a new file named ```.env.local```.
+- Go to your Supabase project settings (```Settings```>```API```) and find your Project URL and ```anon``` public key.
 
-To learn more about Next.js, take a look at the following resources:
+5. **Add these lines in your ```env.local``` file:**
+  ```bash
+  NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+  NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+  ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+6. **Run the development server**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+  ```bash
+  npm run dev
+  ```
 
-## Deploy on Vercel
+## Contact
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Mikko_Melgar-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/mikko-melgar-447069233)
+[![Email](https://img.shields.io/badge/Email-Contact%20Me-red?style=for-the-badge&logo=gmail)](mailto:springleaked@gmail.com)
