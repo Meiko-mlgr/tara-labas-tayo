@@ -78,3 +78,4 @@ export const Player = forwardRef<RapierRigidBody, PlayerProps>(({ character, tar
     </RigidBody>
   );
 });
+Player.displayName = "Player";

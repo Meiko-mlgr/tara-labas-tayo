@@ -66,7 +66,7 @@ export default function MainMenu({ onPlay, onContinue, onCreateCharacter, onSign
           <div className="text-center text-white">
              <div className="relative text-center mb-10">
                 <h1 className="text-5xl font-bold">Tara, Labas Tayo?</h1>
-                <p className="text-lg text-grey-500 italic absolute -bottom-7 right-0">"Come on, let's go out?"</p>
+                <p className="text-lg text-grey-500 italic absolute -bottom-7 right-0">&quot;Come on, let&rsquo;s go out?&quot;</p>
             </div>
             <div className="space-y-4 pt-4">
             {activeCharacter ? (

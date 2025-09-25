@@ -118,6 +118,7 @@ const SceneContent = ({ gameState, avatarColor, activeCharacter, isFirstPlay }: 
           return randomSpawnPoint;
         }
         return lastPlayerPosition;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [isFirstPlay]);
     
       useFrame(() => {
