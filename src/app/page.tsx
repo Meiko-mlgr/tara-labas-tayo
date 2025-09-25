@@ -37,11 +37,11 @@ const MainScene = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         // Fetch characters
-        const { data: chars, error: charsError } = await supabase.from('characters').select('*').eq('user_id', session.user.id);
+        const { data: chars } = await supabase.from('characters').select('*').eq('user_id', session.user.id);
         if (chars) setCharacters(chars as Character[]);
 
         // Fetch username from profiles table
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile } = await supabase
           .from('profiles')
           .select('username')
           .eq('id', session.user.id)
@@ -64,7 +64,7 @@ const MainScene = () => {
 
             channel.on('presence', { event: 'sync' }, () => {
                 const presenceState = channel.presenceState<PresencePayload>();
-                const userIds = Object.keys(presenceState).map(presenceId => presenceState[presenceId][0].user_id);
+                Object.keys(presenceState).map(presenceId => presenceState[presenceId][0].user_id);
             });
 
             channel.on('presence', { event: 'join' }, async ({ newPresences }) => {
@@ -131,7 +131,8 @@ const MainScene = () => {
         
         await channel.untrack();
 
-      } catch (error) {
+      } catch {
+        //do nothing
       }
     }
     
@@ -142,7 +143,7 @@ const MainScene = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !selectedSlot) return;
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('characters')
       .insert({ user_id: user.id, avatar_color: avatarColor, slot_number: selectedSlot })
       .select().single();

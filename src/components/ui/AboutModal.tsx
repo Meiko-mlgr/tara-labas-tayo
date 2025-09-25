@@ -81,7 +81,7 @@ export const TailwindIcon = () => (
 );
 
 const CloseIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+    <svg {...props} xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
 );
@@ -107,7 +107,7 @@ export default function AboutModal({ onClose }: AboutModalProps) {
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="bg-gray-800/80 border border-gray-700 text-white rounded-lg shadow-2xl max-w-4xl w-full mx-auto relative max-h-[90vh] flex flex-col">
         <div className="p-6 border-b border-gray-700 flex justify-between items-center flex-shrink-0">
-            <h2 className="text-4xl font-bold">What is "Tara, Labas Tayo?"</h2>
+            <h2 className="text-4xl font-bold">What is &quot;Tara, Labas Tayo?&quot;</h2>
             <button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
@@ -121,10 +121,10 @@ export default function AboutModal({ onClose }: AboutModalProps) {
             <div className="md:col-span-2">
               <Section title="The Inspiration">
                   <p>
-                      "Tara, Labas Tayo?" ("Come on, let's go out?") is common Filipino word used in inviting people out. This project was born from the idea of creating a digital hangout spot that captures that same spirit of community and friendship.
+                      &quot;Tara, Labas Tayo?&quot; (&quot;Come on, let&rsquo;s go out?&quot;) is common Filipino word used in inviting people out. This project was born from the idea of creating a digital hangout spot that captures that same spirit of community and friendship.
                   </p>
                   <p>
-                      It's a web-based, 3D social space where users can meet up, chat in real-time, and simply spend time together, whether they're across the street or across the world.
+                      It&rsquo;s a web-based, 3D social space where users can meet up, chat in real-time, and simply spend time together, whether they&rsquo;re across the street or across the world.
                   </p>
               </Section>
 
@@ -163,4 +163,3 @@ export default function AboutModal({ onClose }: AboutModalProps) {
     </div>
   );
 }
-

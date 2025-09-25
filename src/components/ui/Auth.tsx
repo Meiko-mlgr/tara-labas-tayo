@@ -61,7 +61,8 @@ export default function AuthComponent() {
         if (error) throw error;
         setMessage("Check your email for the confirmation link!");
       }
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as Error;
       if (error.message && error.message.includes('duplicate key value violates unique constraint')) {
         setError('This username is already taken. Please choose another one.');
       } else {
@@ -79,7 +80,7 @@ export default function AuthComponent() {
             <NewLogoIcon className="mx-auto h-35 w-auto text-cyan-400" />
             <div className="relative text-center mt-2">
                 <h1 className="text-4xl font-bold text-white tracking-tight">Tara, Labas Tayo?</h1>
-                <p className="text-md text-cyan-300 italic absolute -bottom-5 right-0">"Come on, let's go out?"</p>
+                <p className="text-md text-cyan-300 italic absolute -bottom-5 right-0">&quot;Come on, let&rsquo;s go out?&quot;</p>
             </div>
         </div>
 
@@ -188,4 +189,3 @@ export default function AuthComponent() {
     </div>
   );
 }
-

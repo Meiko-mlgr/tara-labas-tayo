@@ -47,7 +47,7 @@ export default function Chat({ systemMessage }: { systemMessage: string | null }
 
   useEffect(() => {
     const fetchMessages = async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('messages')
         .select('*, profiles(username)')
         .order('inserted_at', { ascending: true });
