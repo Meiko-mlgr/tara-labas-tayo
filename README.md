@@ -2,6 +2,10 @@
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://tara-labas.netlify.app)
 
+[![K0HIJhF.md.png](https://iili.io/K0HIJhF.md.png)](https://freeimage.host/i/K0HIJhF)
+
+[![K0HIHI1.md.png](https://iili.io/K0HIHI1.md.png)](https://freeimage.host/i/K0HIHI1)
+
 _"Tara, Labas Tayo?"_ is a Filipino phrase that translates to "Come on, let's go out?". This project is a web-based, 3D social space where users can create characters, hang out, and chat in real-time. It's a digital hangout spot that captures the spirit of community and friendship.
 
 ## About The Project
@@ -35,7 +39,7 @@ To get a local copy up and running follow these simple steps.
 
 1.  **Clone the repository**
     ```bash
-    git clone [https://github.com/Meiko-mlgr/tara-labas-tayo.git](https://github.com/Meiko-mlgr/tara-labas-tayo.git)
+    git clone https://github.com/Meiko-mlgr/tara-labas-tayo
     ```
 2.  **Navigate to the project directory**
     ```bash
