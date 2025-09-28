@@ -143,14 +143,20 @@ const MainScene = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !selectedSlot) return;
 
-    const { data } = await supabase
+    const { data: newCharacter } = await supabase
       .from('characters')
       .insert({ user_id: user.id, avatar_color: avatarColor, slot_number: selectedSlot })
-      .select().single();
+      .select()
+      .single();
 
-    if (data) {
-      setCharacters([...characters, data as Character]);
-      setActiveCharacter(data as Character);
+    if (newCharacter) {
+      const characterWithUsername: Character = {
+        ...newCharacter,
+        username: username || 'Player'
+      };
+
+      setCharacters([...characters, characterWithUsername]);
+      setActiveCharacter(characterWithUsername);
       setGameState('in_game');
       setIsFirstPlay(true);
     }
