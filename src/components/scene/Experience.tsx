@@ -3,7 +3,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, OrthographicCamera, PerspectiveCamera } from "@react-three/drei";
 import { Physics, CuboidCollider, RigidBody, RapierRigidBody } from "@react-three/rapier";
-import { useMemo, useState, useRef, Suspense } from "react";
+import { useMemo, useState, useRef, Suspense, useEffect } from "react";
 import * as THREE from 'three';
 import { Player } from "./Player";
 import { type Character } from "../ui/MainMenu";

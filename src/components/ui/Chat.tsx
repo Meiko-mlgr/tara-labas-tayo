@@ -29,6 +29,7 @@ export default function Chat({ systemMessage }: { systemMessage: string | null }
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -46,6 +47,8 @@ export default function Chat({ systemMessage }: { systemMessage: string | null }
 
 
   useEffect(() => {
+
+    
     const fetchMessages = async () => {
       const { data } = await supabase
         .from('messages')
@@ -58,9 +61,17 @@ export default function Chat({ systemMessage }: { systemMessage: string | null }
     };
 
     // Initial session check and fetch
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       if (session) {
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+        if (profile) setCurrentUserRole(profile.role);
+
         fetchMessages();
       }
     });
@@ -78,6 +89,20 @@ export default function Chat({ systemMessage }: { systemMessage: string | null }
       subscription?.unsubscribe();
     };
   }, []); 
+
+  const handleKickPlayer = async (targetUserId: string, username: string) => {
+    if (!confirm(`Are you sure you want to kick ${username}?`)) return;
+
+    try {
+      const { error } = await supabase.functions.invoke('kick-player', {
+        body: { targetUserId },
+      });
+      if (error) throw error;
+      alert(`${username} has been kicked.`);
+    } catch (error) {
+      alert(`Error kicking player: ${(error as Error).message}`);
+    }
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,12 +154,20 @@ export default function Chat({ systemMessage }: { systemMessage: string | null }
                       <span className="ml-2 text-xs text-gray-400 font-normal">
                         {formatMessageTime(msg.inserted_at)}
                       </span>
+                      {currentUserRole === 'admin' && !isMyMessage && (
+                        <button
+                          onClick={() => handleKickPlayer(msg.user_id, getSenderName(msg))}
+                          className="ml-2 text-xs text-red-400 hover:text-red-300 font-bold"
+                        >
+                          [Kick]
+                        </button>
+                      )}
                     </p>
                     <p className="text-sm text-gray-200 break-all">{msg.content}</p>
                   </div>
                 </div>
               </React.Fragment>
-            )
+            );
           })}
           {systemMessage && (
             <div className="text-center my-2">

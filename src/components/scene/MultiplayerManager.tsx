@@ -40,7 +40,7 @@ export const MultiplayerManager = ({ character, playerRigidBodyRef, playerGroupR
     const lastBroadcastTime = useRef(0);
 
     useEffect(() => {
-        const channel = supabase.channel('game-room', {
+        const channel = supabase.channel('game-room-v2', {
             config: {
                 presence: {
                     key: character.id, 
@@ -71,7 +71,7 @@ export const MultiplayerManager = ({ character, playerRigidBodyRef, playerGroupR
                 if (id !== character.id) {
                     const pres = presenceState[id][0];
                     newPlayers[id] = {
-                        position: { x: 0, y: -10, z: 0 }, 
+                        position: { x: 0, y: 10, z: 0 }, 
                         rotationY: 0,
                         userId: pres.userId,
                         avatar_color: pres.avatar_color,

@@ -58,7 +58,7 @@ const MainScene = () => {
         const { data: { session } } = await supabase.auth.getSession();
       
         if (session && username) {
-            const channel = supabase.channel('room-presence', {
+            const channel = supabase.channel('room-presence-v2', {
                 config: { presence: { key: session.user.id } }
             });
 
@@ -190,6 +190,32 @@ const MainScene = () => {
     setActiveCharacter(null);
   };
 
+  useEffect(() => {
+    const listenForKickEvent = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+
+        const privateChannel = supabase.channel(`private-kick-channel-${session.user.id}`);
+
+        privateChannel.on('broadcast', { event: 'you-are-kicked' }, () => {
+
+          alert('You have been disconnected by an admin.');
+          setGameState('menu'); 
+          setActiveCharacter(null);
+          supabase.removeChannel(privateChannel); 
+        });
+
+        privateChannel.subscribe();
+
+        return () => {
+          supabase.removeChannel(privateChannel);
+        };
+      }
+    };
+
+    listenForKickEvent();
+  }, []);
+
 
   return (
   <div className="w-full h-screen relative bg-gray-800">
@@ -239,6 +265,8 @@ const MainScene = () => {
 export default function Home() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [characters, setCharacters] = useState<(Character | null)[]>([]);
+  const [activeCharacter, setActiveCharacter] = useState<Character | null>(null); 
 
   useEffect(() => {
     const handleContextMenu = (e: MouseEvent) => {
