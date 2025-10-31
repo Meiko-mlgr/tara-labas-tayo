@@ -6,6 +6,8 @@
 
 [![K0HIHI1.md.png](https://iili.io/K0HIHI1.md.png)](https://freeimage.host/i/K0HIHI1)
 
+[![KsH2172.md.png](https://iili.io/KsH2172.md.png)](https://freeimage.host/i/KsH2172)
+
 _"Tara, Labas Tayo?"_ is a Filipino phrase that translates to "Come on, let's go out?". This project is a web-based, 3D social space where users can create characters, hang out, and chat in real-time. It's a digital hangout spot that captures the spirit of community and friendship.
 
 ## About The Project
